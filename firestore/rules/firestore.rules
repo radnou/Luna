@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidUser() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+    
+    function isValidTimestamp(field) {
+      return request.resource.data[field] is timestamp;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && 
+        hasRequiredFields(['email', 'createdAt', 'updatedAt']) &&
+        isValidTimestamp('createdAt') &&
+        isValidTimestamp('updatedAt');
+      allow update: if isOwner(userId) && 
+        isValidTimestamp('updatedAt') &&
+        request.resource.data.uid == userId;
+      allow delete: if false; // Prevent accidental deletion
+    }
+    
+    // Journal entries collection
+    match /journal_entries/{entryId} {
+      allow read: if isValidUser() && 
+        (resource.data.userId == request.auth.uid || 
+         resource.data.isPrivate == false);
+      allow create: if isValidUser() && 
+        request.resource.data.userId == request.auth.uid &&
+        hasRequiredFields(['userId', 'content', 'isPrivate', 'createdAt', 'updatedAt']) &&
+        isValidTimestamp('createdAt') &&
+        isValidTimestamp('updatedAt');
+      allow update: if isValidUser() && 
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        isValidTimestamp('updatedAt');
+      allow delete: if isValidUser() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Analyses collection
+    match /analyses/{analysisId} {
+      allow read: if isValidUser() && 
+        (resource.data.userId == request.auth.uid || 
+         resource.data.isPublic == true);
+      allow create: if isValidUser() && 
+        request.resource.data.userId == request.auth.uid &&
+        hasRequiredFields(['userId', 'type', 'title', 'isPublic', 'createdAt', 'updatedAt']) &&
+        request.resource.data.type in ['birth_chart', 'compatibility', 'transit', 'progression', 'synastry'] &&
+        isValidTimestamp('createdAt') &&
+        isValidTimestamp('updatedAt');
+      allow update: if isValidUser() && 
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.type == resource.data.type &&
+        isValidTimestamp('updatedAt');
+      allow delete: if isValidUser() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Conversations collection
+    match /conversations/{conversationId} {
+      allow read: if isValidUser() && resource.data.userId == request.auth.uid;
+      allow create: if isValidUser() && 
+        request.resource.data.userId == request.auth.uid &&
+        hasRequiredFields(['userId', 'title', 'messages', 'aiModel', 'isArchived', 'createdAt', 'updatedAt']) &&
+        request.resource.data.messages is list &&
+        request.resource.data.aiModel in ['gpt-4', 'claude-3', 'custom'] &&
+        isValidTimestamp('createdAt') &&
+        isValidTimestamp('updatedAt');
+      allow update: if isValidUser() && 
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        isValidTimestamp('updatedAt');
+      allow delete: if isValidUser() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Relationships collection
+    match /relationships/{relationshipId} {
+      allow read: if isValidUser() && 
+        (resource.data.userId == request.auth.uid || 
+         resource.data.partnerId == request.auth.uid);
+      allow create: if isValidUser() && 
+        request.resource.data.userId == request.auth.uid &&
+        hasRequiredFields(['userId', 'partnerName', 'type', 'status', 'createdAt', 'updatedAt']) &&
+        request.resource.data.type in ['romantic', 'friendship', 'family', 'professional'] &&
+        request.resource.data.status in ['active', 'past', 'potential'] &&
+        isValidTimestamp('createdAt') &&
+        isValidTimestamp('updatedAt');
+      allow update: if isValidUser() && 
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        isValidTimestamp('updatedAt');
+      allow delete: if isValidUser() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isValidUser() && resource.data.userId == request.auth.uid;
+      allow create: if false; // Only server can create notifications
+      allow update: if isValidUser() && 
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'updatedAt']);
+      allow delete: if isValidUser() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Public profiles (limited user data for sharing)
+    match /public_profiles/{userId} {
+      allow read: if true; // Public access
+      allow write: if false; // Only server can write
+    }
+  }
+}

@@ -1,0 +1,154 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidUser() {
+      return isAuthenticated() && request.auth.uid != null;
+    }
+    
+    function isValidEmail() {
+      return isAuthenticated() && request.auth.token.email_verified == true;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read and write their own profile
+      allow read, write: if isOwner(userId);
+      
+      // Allow creation if the document ID matches the authenticated user
+      allow create: if isOwner(userId) && 
+        request.resource.data.keys().hasAll(['email', 'createdAt']) &&
+        request.resource.data.email == request.auth.token.email;
+      
+      // Allow updates but prevent changing sensitive fields
+      allow update: if isOwner(userId) && 
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['email', 'createdAt']);
+    }
+    
+    // Journal entries collection
+    match /journal_entries/{entryId} {
+      // Users can only access their own journal entries
+      allow read, write: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      
+      // Allow creation of new entries
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['userId', 'title', 'content', 'createdAt']) &&
+        request.resource.data.title is string &&
+        request.resource.data.content is string &&
+        request.resource.data.title.size() > 0 &&
+        request.resource.data.content.size() > 0;
+      
+      // Allow updates but prevent changing ownership
+      allow update: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['userId', 'createdAt']);
+    }
+    
+    // Astrology data collection
+    match /astrology_data/{dataId} {
+      // Users can only access their own astrology data
+      allow read, write: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      
+      // Allow creation of new astrology data
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['userId', 'type', 'data', 'createdAt']) &&
+        request.resource.data.type is string &&
+        request.resource.data.data is map;
+      
+      // Allow updates but prevent changing ownership
+      allow update: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == request.auth.uid &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['userId', 'createdAt']);
+    }
+    
+    // Test collection (for connection testing only)
+    match /test/{testId} {
+      // Allow authenticated users to create/read/delete test documents
+      allow read, write, delete: if isAuthenticated();
+      
+      // Automatically delete test documents after 1 hour
+      allow create: if isAuthenticated() && 
+        request.resource.data.keys().hasAll(['timestamp']);
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// Storage rules (to be used in Firebase Storage)
+/*
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidImageFile() {
+      return request.resource.contentType.matches('image/.*') &&
+        request.resource.size < 10 * 1024 * 1024; // 10MB limit
+    }
+    
+    function isValidDocumentFile() {
+      return request.resource.contentType.matches('(image/.*|application/pdf|text/plain)') &&
+        request.resource.size < 50 * 1024 * 1024; // 50MB limit
+    }
+    
+    // User profile images
+    match /user_profiles/{userId}/{fileName} {
+      allow read, write, delete: if isOwner(userId) && isValidImageFile();
+    }
+    
+    // Journal images
+    match /journal_images/{userId}/{fileName} {
+      allow read, write, delete: if isOwner(userId) && isValidImageFile();
+    }
+    
+    // Astrology charts
+    match /astrology_charts/{userId}/{fileName} {
+      allow read, write, delete: if isOwner(userId) && isValidImageFile();
+    }
+    
+    // User documents
+    match /user_documents/{userId}/{fileName} {
+      allow read, write, delete: if isOwner(userId) && isValidDocumentFile();
+    }
+    
+    // Test files (temporary)
+    match /test/{userId}/{fileName} {
+      allow read, write, delete: if isOwner(userId);
+    }
+    
+    // Deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+*/

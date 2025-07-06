@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "396183924939",
+    "project_id": "luna-e1ad5",
+    "storage_bucket": "luna-e1ad5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:396183924939:android:58c4966025bdbf90872b4e",
+        "android_client_info": {
+          "package_name": "com.example.luna_test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "396183924939-0123456789abcdef.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.luna_test",
+            "certificate_hash": "sha1_hash_placeholder"
+          }
+        },
+        {
+          "client_id": "396183924939-0123456789abcdef.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmeE-DJmAyFJzpkcf7gaYQ9ddkwe6zdO4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "396183924939-0123456789abcdef.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

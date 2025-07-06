@@ -1,0 +1,75 @@
+name: luna
+description: A mindful dating app that uses astrology and psychology to create meaningful connections.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Firebase
+  firebase_core: ^3.15.1
+  firebase_auth: ^5.6.2
+  cloud_firestore: ^5.6.11
+  firebase_storage: ^12.4.9
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # UI/UX
+  google_fonts: ^6.1.0
+  flutter_svg: ^2.0.9
+  lottie: ^3.0.0
+  smooth_page_indicator: ^1.1.0
+  
+  # Utilities
+  intl: ^0.20.2
+  shared_preferences: ^2.2.2
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  
+  # Forms
+  flutter_form_builder: ^10.1.0
+  form_builder_validators: ^11.2.0
+  
+  # Animations
+  flutter_animate: ^4.3.0
+  
+  # Images
+  cached_network_image: ^3.3.1
+  image_picker: ^1.0.7
+  
+  # OAuth
+  google_sign_in: ^7.1.0
+  sign_in_with_apple: ^7.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/animations/
+    
+  fonts:
+    - family: Quicksand
+      fonts:
+        - asset: assets/fonts/Quicksand-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Quicksand-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Quicksand-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Quicksand-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Quicksand-Bold.ttf
+          weight: 700
