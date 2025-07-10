@@ -1,0 +1,98 @@
+{
+  "expo": {
+    "name": "Luna",
+    "slug": "luna-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1A1B3A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.luna.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Luna needs access to your camera to take photos for your journal and profile.",
+        "NSPhotoLibraryUsageDescription": "Luna needs access to your photo library to select photos for your journal and profile.",
+        "NSFaceIDUsageDescription": "Luna uses Face ID to secure your personal data and provide quick access to the app.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": ["luna-app"]
+          }
+        ]
+      },
+      "usesAppleSignIn": true,
+      "googleServicesFile": "./ios/GoogleService-Info.plist"
+    },
+    "android": {
+      "package": "com.luna.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1A1B3A"
+      },
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "USE_FINGERPRINT",
+        "USE_BIOMETRIC"
+      ],
+      "googleServicesFile": "./android/app/google-services.json",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": {
+            "scheme": "luna-app",
+            "host": "*"
+          },
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FF6B9D",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Luna to use Face ID to secure your personal data."
+        }
+      ],
+      "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.YOUR_GOOGLE_IOS_CLIENT_ID"
+        }
+      ]
+    ],
+    "scheme": "luna-app",
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    },
+    "owner": "luna-team"
+  }
+}
