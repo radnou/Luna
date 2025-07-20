@@ -16,6 +16,7 @@ import { OnboardingButton } from '@/src/components/onboarding/OnboardingButton';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 interface Question {
   id: string;
@@ -87,8 +88,9 @@ const questions: Question[] = [
 ];
 
 export default function PersonalityScreen() {
+  const { data, updatePersonality } = useOnboarding();
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>(data.personality);
   const progressAnimation = useSharedValue(0);
   const questionOpacity = useSharedValue(1);
   const questionScale = useSharedValue(1);
@@ -100,19 +102,21 @@ export default function PersonalityScreen() {
     });
   }, [currentQuestion]);
 
-  const selectAnswer = (questionId: string, value: string) => {
+  const selectAnswer = async (questionId: string, value: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+    const newAnswers = { ...answers, [questionId]: value };
+    setAnswers(newAnswers);
     
     // Animate transition
     questionOpacity.value = withTiming(0, { duration: 200 }, (finished) => {
       if (finished) {
-        runOnJS(() => {
+        runOnJS(async () => {
           if (currentQuestion < questions.length - 1) {
             setCurrentQuestion(currentQuestion + 1);
           } else {
-            // Complete personality quiz
+            // Complete personality quiz and save
+            await updatePersonality(newAnswers);
             router.push('/(onboarding)/preferences');
           }
         })();

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { AuthProvider } from '@contexts/AuthContext';
+import { OnboardingProvider } from '@contexts/OnboardingContext';
 import { colors } from '@styles/colors';
 import { loadFonts } from '@/src/utils/loadFonts';
 import * as SplashScreen from 'expo-splash-screen';
@@ -36,25 +37,27 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <Stack
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: colors.neutral.white,
-          },
-          headerTintColor: colors.primary.pink,
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
-          contentStyle: {
-            backgroundColor: colors.neutral.white,
-          },
-        }}
-      >
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-      </Stack>
+      <OnboardingProvider>
+        <Stack
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: colors.neutral.white,
+            },
+            headerTintColor: colors.primary.pink,
+            headerTitleStyle: {
+              fontWeight: '600',
+            },
+            contentStyle: {
+              backgroundColor: colors.neutral.white,
+            },
+          }}
+        >
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+        </Stack>
+      </OnboardingProvider>
     </AuthProvider>
   );
 }

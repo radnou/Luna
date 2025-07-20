@@ -15,6 +15,7 @@ import { OnboardingButton } from '@/src/components/onboarding/OnboardingButton';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 interface Goal {
   id: string;
@@ -56,7 +57,8 @@ const goals: Goal[] = [
 ];
 
 export default function GoalsScreen() {
-  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const { data, updateGoals } = useOnboarding();
+  const [selectedGoals, setSelectedGoals] = useState<string[]>(data.goals);
   const titleOpacity = useSharedValue(0);
   const titleTranslateY = useSharedValue(30);
 
@@ -82,8 +84,9 @@ export default function GoalsScreen() {
     );
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     // Save selected goals to user preferences
+    await updateGoals(selectedGoals);
     router.push('/(onboarding)/personality');
   };
 

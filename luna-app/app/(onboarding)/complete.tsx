@@ -20,11 +20,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import ConfettiCannon from 'react-native-confetti-cannon';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 // import LottieView from 'lottie-react-native';
 
 const { width, height } = Dimensions.get('window');
 
 export default function CompleteScreen() {
+  const { completeOnboarding } = useOnboarding();
   const confettiRef = useRef<ConfettiCannon>(null);
   const logoScale = useSharedValue(0);
   const logoRotation = useSharedValue(0);
@@ -95,8 +97,9 @@ export default function CompleteScreen() {
     opacity: buttonOpacity.value,
   }));
 
-  const handleStart = () => {
-    // Navigate to main app
+  const handleStart = async () => {
+    // Mark onboarding as complete and navigate to main app
+    await completeOnboarding();
     router.replace('/(tabs)');
   };
 

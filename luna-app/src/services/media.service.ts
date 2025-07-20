@@ -208,6 +208,71 @@ class MediaService {
       throw new Error('Failed to get image URL');
     }
   }
+
+  /**
+   * Upload profile photo
+   */
+  async uploadProfilePhoto(userId: string, uri: string): Promise<string> {
+    try {
+      const filename = `profile-${Date.now()}.jpg`;
+      const storagePath = `users/${userId}/profile/${filename}`;
+      const storageRef = ref(storage, storagePath);
+
+      // Compress image
+      const { uri: compressedUri } = await this.compressImage(uri, {
+        maxWidth: 400,
+        maxHeight: 400,
+        quality: 0.8,
+        generateThumbnail: false,
+      });
+
+      // Convert URI to blob
+      const response = await fetch(compressedUri);
+      const blob = await response.blob();
+
+      // Upload
+      const uploadTask = await uploadBytesResumable(storageRef, blob);
+      const downloadURL = await getDownloadURL(uploadTask.ref);
+      
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading profile photo:', error);
+      throw new Error('Failed to upload profile photo');
+    }
+  }
+
+  /**
+   * Upload photo to user's gallery
+   */
+  async uploadPhoto(userId: string, uri: string): Promise<{ id: string; url: string; createdAt: Date }> {
+    try {
+      const result = await this.uploadImage(uri, userId);
+      return {
+        id: uuidv4(),
+        url: result.url,
+        createdAt: new Date(),
+      };
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user photos (mock implementation - should query from Firestore)
+   */
+  async getUserPhotos(userId: string): Promise<any[]> {
+    // This would typically query from a photos collection in Firestore
+    return [];
+  }
+
+  /**
+   * Delete photo (mock implementation)
+   */
+  async deletePhoto(photoId: string): Promise<void> {
+    // This would typically delete from Firestore and Storage
+    console.log('Deleting photo:', photoId);
+  }
 }
 
 export const mediaService = new MediaService();

@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 const { width } = Dimensions.get('window');
 
@@ -26,9 +27,14 @@ const STEPS = [
 
 export default function OnboardingLayout() {
   const segments = useSegments();
+  const { getCurrentStep } = useOnboarding();
   const currentStep = segments[1] as string || 'welcome';
   const currentIndex = STEPS.indexOf(currentStep);
-  const progress = (currentIndex + 1) / STEPS.length;
+  const savedStep = getCurrentStep();
+  
+  // Use the higher of current navigation step or saved step
+  const effectiveStep = Math.max(currentIndex, savedStep);
+  const progress = (effectiveStep + 1) / STEPS.length;
 
   return (
     <LinearGradient
@@ -36,7 +42,7 @@ export default function OnboardingLayout() {
       style={styles.container}
     >
       <View style={styles.progressContainer}>
-        <ProgressIndicator progress={progress} currentStep={currentIndex} />
+        <ProgressIndicator progress={progress} currentStep={effectiveStep} />
       </View>
       <Slot />
     </LinearGradient>

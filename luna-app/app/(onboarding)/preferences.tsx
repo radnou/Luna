@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 interface Preferences {
   notifications: {
@@ -32,16 +33,17 @@ interface Preferences {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function PreferencesScreen() {
+  const { data, updatePreferences } = useOnboarding();
   const [preferences, setPreferences] = useState<Preferences>({
     notifications: {
-      daily: true,
+      daily: data.preferences.notifications,
       insights: true,
       reminders: false,
     },
     reminderTime: new Date(new Date().setHours(20, 0, 0, 0)),
-    theme: 'light',
+    theme: data.preferences.theme,
     privacy: {
-      analytics: true,
+      analytics: data.preferences.analytics,
       backup: true,
     },
   });
@@ -75,8 +77,13 @@ export default function PreferencesScreen() {
     setPreferences(prev => ({ ...prev, theme }));
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     // Save preferences
+    await updatePreferences({
+      theme: preferences.theme,
+      notifications: preferences.notifications.daily,
+      analytics: preferences.privacy.analytics,
+    });
     router.push('/(onboarding)/profile');
   };
 

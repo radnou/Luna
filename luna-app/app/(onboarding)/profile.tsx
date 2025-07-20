@@ -27,6 +27,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
@@ -37,10 +38,11 @@ interface ProfileData {
 }
 
 export default function ProfileScreen() {
+  const { data, updateProfile } = useOnboarding();
   const [profile, setProfile] = useState<ProfileData>({
-    name: '',
-    birthDate: null,
-    photo: null,
+    name: data.profile.name || '',
+    birthDate: data.profile.birthDate ? new Date(data.profile.birthDate) : null,
+    photo: data.profile.photoUri || null,
   });
   
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -77,8 +79,13 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     // Save profile data
+    await updateProfile({
+      name: profile.name,
+      birthDate: profile.birthDate ? profile.birthDate.toISOString() : '',
+      photoUri: profile.photo || undefined,
+    });
     router.push('/(onboarding)/complete');
   };
 
